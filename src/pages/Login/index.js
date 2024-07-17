@@ -3,12 +3,15 @@ import './index.scss';
 import logo from '@/assets/logo.png';
 
 const Login = () => {
+  const onFinish = (value) => {
+    console.log(value);
+  };
   return (
     <div className="login">
       <Card className="login-container">
         <img className="login-logo" src={logo} alt="" />
         {/** 失焦校验 */}
-        <Form validateTrigger="onBlur">
+        <Form onFinish={onFinish} validateTrigger="onBlur">
           <Form.Item
             name="mobile"
             // 多条校验逻辑，按照顺序校验，第一条通过再校验第二条
