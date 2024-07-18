@@ -7,12 +7,16 @@ const userStore = createSlice({
   initialState: {
     // 要先校验localstorage中有没有
     token: getToken() || '',
+    userInfo: {},
   },
   reducers: {
     setToken(state, action) {
       state.token = action.payload;
       // localStorage也要保存一份，因为redux是基于浏览器内存的，刷新后token会丢失
       _setToken(action.payload);
+    },
+    setUserInfo(state, action) {
+      state.userInfo = action.payload;
     },
   },
 });
@@ -25,9 +29,16 @@ const fetchLogin = (loginForm) => {
   };
 };
 
-const { setToken } = userStore.actions;
+const fetchUserInfo = () => {
+  return async (dispatch) => {
+    const res = await request.get('/user/profile');
+    dispatch(setUserInfo(res.data));
+  };
+};
+
+const { setToken, setUserInfo } = userStore.actions;
 
 const userReducer = userStore.reducer;
 
-export { fetchLogin, setToken };
+export { fetchLogin, setToken, fetchUserInfo };
 export default userReducer;
