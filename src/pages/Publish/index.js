@@ -13,24 +13,17 @@ import {
 import { PlusOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import './index.scss';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { createArticleAPI, getChannelAPI } from '@/apis/article';
+import { createArticleAPI } from '@/apis/article';
+import { useChannel } from '@/hooks/useChannel';
 
 const { Option } = Select;
 
 const Publish = () => {
   // 获取频道列表
-  const [channelList, setChannelList] = useState([]);
-  useEffect(() => {
-    const getChannelList = async () => {
-      const res = await getChannelAPI();
-      setChannelList(res.data.channels);
-    };
-    // 利用useEffect触发异步获取后端接口
-    getChannelList();
-  }, []);
+  const { channelList } = useChannel();
 
   // 提交表单
   const onFinish = (formValue) => {
