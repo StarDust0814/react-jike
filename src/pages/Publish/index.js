@@ -8,6 +8,7 @@ import {
   Upload,
   Space,
   Select,
+  message,
 } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
@@ -33,15 +34,17 @@ const Publish = () => {
 
   // 提交表单
   const onFinish = (formValue) => {
-    console.log(formValue);
     // 根据接口文档格式处理收集到的表单数据
+    // 校验上传的图片数量和图片上传模式是否匹配
+    if (imageList.length !== imageType)
+      return message.warning('封面类型和图片数量不匹配');
     const { title, content, channel_id } = formValue;
     const reqData = {
       title,
       content,
       cover: {
-        type: 0,
-        images: [],
+        type: imageType,
+        images: imageList.map((item) => item.response.data.url),
       },
       channel_id,
     };
@@ -115,6 +118,7 @@ const Publish = () => {
                 action={'http://geek.itheima.net/v1_0/upload'}
                 name="image"
                 onChange={onChange}
+                maxCount={imageType}
               >
                 <div style={{ marginTop: 8 }}>
                   <PlusOutlined />
