@@ -53,6 +53,14 @@ const Article = () => {
     // reqData被useEffect依赖更新后，触发后重新获取文章列表
   };
 
+  // 分页触发列表更新
+  const onPageChange = (page) => {
+    setReqData({
+      ...reqData,
+      page: page.current,
+    });
+  };
+
   // 准备列数据
   const columns = [
     {
@@ -186,7 +194,16 @@ const Article = () => {
       </Card>
       {/**表格区域 */}
       <Card title={`根据筛选条件共查询到 ${count} 条结果：`}>
-        <Table rowKey="id" columns={columns} dataSource={list} />
+        <Table
+          rowKey="id"
+          columns={columns}
+          dataSource={list}
+          pagination={{
+            total: count,
+            pageSize: reqData.per_page,
+          }}
+          onChange={onPageChange}
+        />
       </Card>
     </div>
   );
