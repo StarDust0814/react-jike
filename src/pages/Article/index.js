@@ -29,6 +29,30 @@ const Article = () => {
     2: <Tag color="success">审核通过</Tag>,
   };
 
+  // 筛选功能
+  // 1. 准备参数
+  const [reqData, setReqData] = useState({
+    status: '',
+    channel_id: '',
+    begin_pubdate: '',
+    end_pubdate: '',
+    page: 1,
+    per_page: 4,
+  });
+
+  const onFinish = (formValue) => {
+    console.log(formValue.date[0].format('YYYY-MM-DD'));
+    setReqData({
+      ...reqData,
+      channel_id: formValue.channel_id,
+      status: formValue.status,
+      begin_pubdate: formValue.date[0].format('YYYY-MM-DD'),
+      end_pubdate: formValue.date[1].format('YYYY-MM-DD'),
+    });
+    console.log(reqData);
+    // reqData被useEffect依赖更新后，触发后重新获取文章列表
+  };
+
   // 准备列数据
   const columns = [
     {
@@ -103,14 +127,18 @@ const Article = () => {
   // 获取文章列表
   const [list, setList] = useState([]);
   const [count, setCount] = useState(0);
-  useEffect(() => {
-    async function getList() {
-      const res = await getArticleListAPI();
-      setList(res.data.results);
-      setCount(res.data.total_count);
-    }
-    getList();
-  }, []);
+  useEffect(
+    () => {
+      async function getList() {
+        const res = await getArticleListAPI(reqData);
+        setList(res.data.results);
+        setCount(res.data.total_count);
+      }
+      getList();
+    },
+    // 绑定依赖项是state状态变量reqData，当其更新后，触发副作用函数的更新列表机制，并将reqData传入
+    [reqData]
+  );
 
   return (
     <div>
@@ -125,7 +153,7 @@ const Article = () => {
         }
         style={{ marginBottom: 20 }}
       >
-        <Form initialValues={{ status: '' }}>
+        <Form initialValues={{ status: '' }} onFinish={onFinish}>
           <Form.Item label="状态" name="status">
             <Radio.Group>
               <Radio value={''}>全部</Radio>
