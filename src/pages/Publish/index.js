@@ -11,12 +11,12 @@ import {
   message,
 } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import './index.scss';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { createArticleAPI } from '@/apis/article';
+import { createArticleAPI, getArticleById } from '@/apis/article';
 import { useChannel } from '@/hooks/useChannel';
 
 const { Option } = Select;
@@ -58,6 +58,21 @@ const Publish = () => {
     setImageType(e.target.value);
   };
 
+  // 回填数据
+  const [searchParam] = useSearchParams();
+  const articleId = searchParam.get('id');
+  // 表单实例
+  const [form] = Form.useForm();
+  useEffect(() => {
+    // 通过id获取对应的文章数据
+    async function getArticleDetail() {
+      const res = await getArticleById(articleId);
+      form.setFieldsValue(res.data);
+    }
+    getArticleDetail();
+    // 调用实例方法完成回填
+  }, [articleId, form]);
+
   return (
     <div className="publish">
       <Card
@@ -75,6 +90,7 @@ const Publish = () => {
           wrapperCol={{ span: 16 }}
           initialValues={{ type: 0 }}
           onFinish={onFinish}
+          form={form}
         >
           <Form.Item
             label="标题"
