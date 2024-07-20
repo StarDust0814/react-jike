@@ -56,10 +56,12 @@ const Publish = () => {
       channel_id,
     };
     if (articleId) {
-      updateArticleAPI(reqData);
+      console.log('update article ', reqData);
+      updateArticleAPI({ ...reqData, id: articleId });
     } else {
       createArticleAPI(reqData);
     }
+    return message.success('发布成功');
   };
 
   // 上传图片
