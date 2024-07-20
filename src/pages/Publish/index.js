@@ -16,7 +16,11 @@ import './index.scss';
 import { useEffect, useState } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { createArticleAPI, getArticleById } from '@/apis/article';
+import {
+  createArticleAPI,
+  getArticleById,
+  updateArticleAPI,
+} from '@/apis/article';
 import { useChannel } from '@/hooks/useChannel';
 
 const { Option } = Select;
@@ -32,16 +36,30 @@ const Publish = () => {
     if (imageList.length !== imageType)
       return message.warning('封面类型和图片数量不匹配');
     const { title, content, channel_id } = formValue;
+    // 发布文章和编辑文章需要将图片URL处理成不同的数据结构
     const reqData = {
       title,
       content,
       cover: {
         type: imageType,
-        images: imageList.map((item) => item.response.data.url),
+        images: imageList.map((item) => {
+          // 发布文章的URL处理
+          if (item.response) {
+            return item.response.data.url;
+          }
+          // 更新文章的URL处理
+          else {
+            return item.url;
+          }
+        }),
       },
       channel_id,
     };
-    createArticleAPI(reqData);
+    if (articleId) {
+      updateArticleAPI(reqData);
+    } else {
+      createArticleAPI(reqData);
+    }
   };
 
   // 上传图片
@@ -67,9 +85,24 @@ const Publish = () => {
     // 通过id获取对应的文章数据
     async function getArticleDetail() {
       const res = await getArticleById(articleId);
-      form.setFieldsValue(res.data);
+      const data = res.data;
+      // 原对象不满足回填的表单字段要求时，可以在原对象的基础上添加新的属性
+      form.setFieldsValue({
+        ...data,
+        type: data.cover.type,
+      });
+      // 处理图片
+      setImageType(data.cover.type);
+      setImageList(
+        data.cover.images.map((url) => {
+          return { url };
+        })
+      );
     }
-    getArticleDetail();
+    if (articleId) {
+      getArticleDetail();
+    }
+
     // 调用实例方法完成回填
   }, [articleId, form]);
 
@@ -80,7 +113,7 @@ const Publish = () => {
           <Breadcrumb
             items={[
               { title: <Link to={'/'}>首页</Link> },
-              { title: '发布文章' },
+              { title: `${articleId ? '编辑' : '发布'}文章` },
             ]}
           />
         }
@@ -128,6 +161,7 @@ const Publish = () => {
                 name="image"
                 onChange={onChange}
                 maxCount={imageType}
+                fileList={imageList}
               >
                 <div style={{ marginTop: 8 }}>
                   <PlusOutlined />
